@@ -1,0 +1,58 @@
+---
+title: "Week of March 7 Tutorial"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE)
+```
+
+## Textbook notes
+
+Also see the textbook comment slide in the March 4 lecture notes. The textbook goes into much more mathematical depth regarding correlation in section 11.12. We'll use correlation mostly as an informal tool. I suppose 11.44(a), 11.45(a,c), 11.47(a,c), 11.49(a,c), are suitable, if not somewhat pointless exercises. Correlation can (and should) be calculated for any bivariate dataset.
+
+We have covered sections 12.1, 12.2, 12.3, and part of 12.4. Under no circumstances do I expect you do practice manually estimating multiple regression parameters. This is always a task for a computer.
+
+Questions 12.1 to 12.16 are are suitable exercises, provided you have a computer handy to perform the calculations. See this week's Lab notes for help with fitting multiple regression models using R, which is very easy. Note that the sample sizes for these questions are incredibly small for fitting regression models with so many variables, which is probably not such a good idea in practice.
+
+## Tutorial questions
+
+1. (2014 midterm)  Here are scatterplots of four bivariate datasets
+called A, B, C, and D.
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+set.seed(1)
+x <- 1:100/10
+A <- 1 + x + rnorm(100, 0, 4)
+B <- 1 - x + rnorm(100, 0, 4)
+C <- 1 + rnorm(100,0,1)
+D <- 1 + (x-3)^2 + rnorm(100,0,3)
+all_data <- gather(data_frame(x, A, B, C, D), Dataset, y, -x)
+all_data %>% 
+  ggplot(aes(x=x, y=y)) + 
+  facet_wrap(~Dataset, nrow=2, scales = "free") +
+    geom_point()
+```
+
+a. The sample correlation coeffients for the four datasets are listed among the following seven numbers. Match dataset to number.
+
+```{r}
+all_data %>% group_by(Dataset) %>% summarize(cor(x,y)) -> cors
+sample(c(0.359, -0.827, round(cors$`cor(x, y)`, 3)))
+```
+
+b. Which of the four datasets has the strongest linear relationship between its two variables?
+
+c. (added...not on 2014 midterm) The sample size for each dataset is 100. The total sum of squares for dataset A is `r var(filter(all_data, Dataset=="A")$y)*100`. Construct the ANOVA table for the regression of $y$ on $x$ for Dataset A.
+
+2. Data from textbook question 12.16. Fit the model, estimate $\sigma^2$, and interpret the p-values for the indivudual $H_0: \beta_i = 0$ tests using the following output:
+
+```{r}
+library(rio)
+gain <- import("Ex12.16.txt")
+summary(lm(Y ~ X1 + X2 + X3, data=gain))
+```
+
